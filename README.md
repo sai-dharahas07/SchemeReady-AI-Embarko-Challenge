@@ -1,4 +1,4 @@
-# 🇮🇳 SchemeReady AI
+# SchemeReady AI
 
 ### Discover Government Schemes. Check Eligibility. Access Benefits.
 
