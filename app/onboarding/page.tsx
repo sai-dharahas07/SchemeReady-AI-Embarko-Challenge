@@ -1,0 +1,50 @@
+"use client";
+
+import { FormEvent, useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowLeft, ArrowRight, Check, Fingerprint, HeartHandshake, LockKeyhole, MapPin, ShieldCheck, Sparkles, UserRound } from "lucide-react";
+import { Logo, Preferences } from "@/components/ui";
+import { useCitizen } from "@/components/providers";
+import { demoProfile, states } from "@/lib/programs";
+import type { Profile } from "@/lib/types";
+
+const blank: Profile = { ...demoProfile, name: "", age: 18, gender: "Prefer not to say", district: "", state: "", income: 50000, incomeMin: 0, incomeMax: 100000, profession: "Student", student: false, employment: "Unemployed", senior: false };
+const incomeOption = (profile: Profile) => {
+  if (profile.incomeMin !== undefined) return `${profile.incomeMin}-${profile.incomeMax === null ? "plus" : profile.incomeMax}`;
+  if (profile.income <= 100000) return "0-100000";
+  if (profile.income <= 200000) return "100001-200000";
+  if (profile.income <= 250000) return "200001-250000";
+  if (profile.income <= 300000) return "250001-300000";
+  if (profile.income <= 450000) return "300001-450000";
+  if (profile.income <= 800000) return "450001-800000";
+  return "800001-plus";
+};
+const steps = [{ title: "First, a little about you.", subtitle: "Every journey starts with a person. Let's start with you.", icon: UserRound }, { title: "Where do you call home?", subtitle: "Your location helps us find national and state opportunities.", icon: MapPin }, { title: "What does life look like today?", subtitle: "A few details help us make your recommendations meaningful.", icon: Fingerprint }, { title: "A few things that make you, you.", subtitle: "One last step to a more personalized starting point.", icon: HeartHandshake }];
+
+export default function Onboarding() {
+  const { profile, setProfile, ready } = useCitizen();
+  const [form, setForm] = useState<Profile>(blank);
+  const [step, setStep] = useState(0);
+  const [consent, setConsent] = useState(false);
+  const router = useRouter();
+  useEffect(() => { if (ready && profile) setForm(profile); }, [ready, profile]);
+  const update = <Key extends keyof Profile>(key: Key, value: Profile[Key]) => setForm(previous => ({ ...previous, [key]: value }));
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (step < 3) { setStep(step + 1); return; }
+    if (!consent) return;
+    setProfile({ ...form, name: form.name.trim(), district: form.district.trim(), senior: form.age >= 60 });
+    router.push("/dashboard");
+  };
+  const Icon = steps[step].icon;
+  return <div className="onboarding-page"><header className="onboarding-header container"><Logo /><Preferences /></header><main id="main" className="onboarding-main container"><aside className="onboarding-aside"><span className="eyebrow">A BETTER TOMORROW STARTS HERE</span><h1>You bring the dream.<br /><span>We&apos;ll find the possibilities.</span></h1><p>A few small details. A world of programs that could make a difference.</p><div className="onboarding-steps">{steps.map((item, index) => <div className={`${index === step ? "current" : ""} ${index < step ? "complete" : ""}`} key={item.title}><span>{index < step ? <Check size={17} /> : index + 1}</span><div><strong>{["Your story", "Your home", "Your everyday", "Your possibilities"][index]}</strong><small>{["A friendly introduction", "National and local support", "Work, education and income", "Make it personal"][index]}</small></div></div>)}</div><div className="onboarding-trust"><ShieldCheck size={22} /><div><strong>Your privacy comes first.</strong><span>Stored on your device. Never sold. No identity numbers needed.</span></div></div></aside>
+      <section className="wizard"><div className="wizard-progress"><span>YOUR CITIZEN PROFILE</span><strong>Step {step + 1} <span>of 4</span></strong></div><div className="progress-track" role="progressbar" aria-label="Profile completion" aria-valuenow={(step + 1) * 25} aria-valuemin={0} aria-valuemax={100}><span style={{ width: `${(step + 1) * 25}%` }} /></div><AnimatePresence mode="wait"><motion.form key={step} initial={{ opacity: 0, x: 15 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -15 }} transition={{ duration: .2 }} onSubmit={submit}><span className="wizard-icon"><Icon size={26} /></span><h2>{steps[step].title}</h2><p className="wizard-subtitle">{steps[step].subtitle}</p><div className="wizard-fields">
+        {step === 0 && <><label className="field">What should we call you?<input className="input" autoComplete="given-name" placeholder="Your first name" value={form.name} maxLength={40} onChange={event => update("name", event.target.value)} required pattern=".*\S.*" /></label><div className="field-row"><label className="field">Age<input className="input" type="number" min="1" max="120" required value={form.age || ""} onChange={event => setForm(previous => ({ ...previous, age: Number(event.target.value), senior: Number(event.target.value) >= 60 }))} /></label><label className="field">Gender (optional)<select className="input" value={form.gender} onChange={event => update("gender", event.target.value as Profile["gender"])}><option>Prefer not to say</option><option>Female</option><option>Male</option><option>Other</option></select></label></div><div className="notice">Gender is used only to identify relevant gender-specific support.</div></>}
+        {step === 1 && <><label className="field">State or union territory<select className="input" value={form.state} required onChange={event => { update("state", event.target.value); update("district", ""); }}><option value="" disabled>Select your state</option>{states.map(state => <option key={state}>{state}</option>)}</select></label><label className="field">District<input className="input" placeholder="e.g. Hyderabad" autoComplete="address-level2" value={form.district} required pattern=".*\S.*" maxLength={70} onChange={event => update("district", event.target.value)} /></label><div className="notice"><MapPin size={16} /> District is included in your profile. This sample engine matches at state level.</div></>}
+        {step === 2 && <><div className="field-row"><label className="field">Profession<select className="input" value={form.profession} onChange={event => update("profession", event.target.value)}>{["Student", "Farmer", "Homemaker", "Salaried employee", "Daily wage worker", "Business owner", "Retired", "Other"].map(value => <option key={value}>{value}</option>)}</select></label><label className="field">Employment status<select className="input" value={form.employment} onChange={event => update("employment", event.target.value)}>{["Unemployed", "Student", "Full-time", "Part-time", "Self-employed", "Retired"].map(value => <option key={value}>{value}</option>)}</select></label></div><label className="field">Annual household income range<select className="input" value={incomeOption(form)} onChange={event => { const [minText, maxText] = event.target.value.split("-"); const min = Number(minText); const max = maxText === "plus" ? null : Number(maxText); update("incomeMin", min); update("incomeMax", max); update("income", max === null ? min : Math.round((min + max) / 2)); }}><option value="0-100000">Up to Rs 1,00,000</option><option value="100001-200000">Rs 1,00,001 - 2,00,000</option><option value="200001-250000">Rs 2,00,001 - 2,50,000</option><option value="250001-300000">Rs 2,50,001 - 3,00,000</option><option value="300001-450000">Rs 3,00,001 - 4,50,000</option><option value="450001-800000">Rs 4,50,001 - 8,00,000</option><option value="800001-plus">Above Rs 8,00,000</option></select><small className="muted">If a scheme threshold falls inside your selected range, we will ask you to confirm the exact amount instead of guessing.</small></label><label className="field">Highest / current education level<select className="input" value={form.education} onChange={event => update("education", event.target.value)}>{["Primary", "Secondary", "Higher secondary", "Diploma", "Undergraduate", "Postgraduate", "Other"].map(value => <option key={value}>{value}</option>)}</select></label></>}
+        {step === 3 && <><div className="status-options">{([{ key: "student", title: "I'm currently a student", subtitle: "School, college or vocational education" }, { key: "farmer", title: "I'm a farmer", subtitle: "Agriculture or allied activities" }, { key: "disability", title: "I have a certified disability", subtitle: "For relevant accessibility support" }] as const).map(item => <label className={`status-option ${form[item.key] ? "selected" : ""}`} key={item.key}><span><strong>{item.title}</strong><small>{item.subtitle}</small></span><input type="checkbox" checked={form[item.key]} onChange={event => update(item.key, event.target.checked)} /></label>)}<div className="status-option"><span><strong>Senior citizen status</strong><small>{form.age >= 60 ? "Yes, based on your age (60+)" : "Not yet, based on your age"}</small></span><span className="badge">{form.age >= 60 ? "Yes" : "No"}</span></div></div><label className="consent"><input type="checkbox" checked={consent} onChange={event => setConsent(event.target.checked)} required /><span>I agree to save this profile in my browser. I understand recommendations are sample estimates, not official eligibility decisions.</span></label></>}
+      </div><div className="wizard-actions">{step > 0 ? <button type="button" className="button secondary" onClick={() => setStep(step - 1)}><ArrowLeft size={16} />Back</button> : <Link href="/" className="text-link"><ArrowLeft size={15} />Home</Link>}<button type="submit" className="button primary">{step === 3 ? "Find my possibilities" : "Continue"}{step === 3 ? <Sparkles size={16} /> : <ArrowRight size={16} />}</button></div></motion.form></AnimatePresence><span className="wizard-private"><LockKeyhole size={12} />No sign-up. No document uploads. Just possibilities.</span></section>
+    </main></div>;
+}

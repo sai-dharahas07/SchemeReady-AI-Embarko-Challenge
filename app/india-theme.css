@@ -1,0 +1,25 @@
+/* Indian tricolour government-style theme: Navy #0A2540, Saffron #FF9933, India Green #138808, White */
+:root { --india-navy: #0A2540; --india-saffron: #FF9933; --india-green: #138808; }
+html body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: 5px; z-index: 9999; pointer-events: none;
+  background: linear-gradient(90deg, #FF9933 0 33.34%, #ffffff 33.34% 66.67%, #138808 66.67% 100%); box-shadow: 0 1px 0 rgba(10,37,64,.12); }
+html body .logo-mark, html body .app-sidebar .logo-mark { background: var(--india-navy); border-top: 3px solid var(--india-saffron); border-bottom: 3px solid var(--india-green); color: #fff; }
+html body .logo-accent { color: var(--india-saffron); }
+html body .hero { background: radial-gradient(ellipse at 10% 70%, #fff1e0 0, transparent 40%), radial-gradient(ellipse at 94% 80%, #e7f4e6 0, transparent 36%), linear-gradient(180deg, var(--surface), var(--bg)); }
+html body .hero-blue { color: var(--india-navy); }
+html body .hero-blue::after { background: var(--india-saffron); opacity: .55; }
+html body .button.primary { background: var(--india-navy); color: #fff; box-shadow: 0 4px 12px rgba(10,37,64,.2); }
+html body .button.primary:hover { background: #061a2e; }
+html body .hero-buttons .button.primary, html body .header-cta.button.primary { background: var(--india-saffron); color: var(--india-navy); box-shadow: 0 4px 14px rgba(255,153,51,.35); font-weight: 700; }
+html body .hero-buttons .button.primary:hover, html body .header-cta.button.primary:hover { background: #f08a1f; }
+html body .site-header { border-bottom: 3px solid var(--india-saffron); }
+html body .app-topbar { border-bottom: 3px solid var(--india-saffron); }
+html body .eyebrow { color: var(--india-green); }
+html body .badge.green { background: #e6f4e4; color: var(--india-green); }
+html body .sidebar-link.active { background: #fff1e0; color: var(--india-navy); box-shadow: inset 3px 0 0 var(--india-saffron); }
+html body .mobile-bottom-nav { border-top: 3px solid var(--india-saffron); }
+html body .mobile-bottom-nav a.active { color: var(--india-green); }
+html body ::selection { background: #ffe0bf; color: var(--india-navy); }
+html body :focus-visible { outline-color: var(--india-saffron); }
+[data-theme="dark"] body .sidebar-link.active { background: #2a2a1e; color: #FFB366; box-shadow: inset 3px 0 0 var(--india-saffron); }
+[data-theme="dark"] body .button.primary { background: var(--india-saffron); color: var(--india-navy); }
+[data-theme="dark"] body .logo-accent { color: #FFB366; }

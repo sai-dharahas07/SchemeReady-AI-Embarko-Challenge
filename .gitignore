@@ -1,0 +1,10 @@
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+.env*.local
+.vercel/
+test-results/
+# Secrets and local environment configuration
+.env*
+!.env.example
